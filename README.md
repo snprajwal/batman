@@ -3,8 +3,8 @@
 *Bat*tery *Man*ager - exactly what it says on the can.
 
 - [x] Warn on low battery
+- [x] Add new batteries upon connection
 - [ ] Suspend on critical battery
-- [ ] Add new batteries upon connection
 - [ ] Dim display on idle
 - [ ] Suspend on idle
 - [ ] Lock session with a custom locker command on idle or suspend

@@ -6,25 +6,33 @@ mod config;
 mod dbus_bindings;
 mod notify;
 
+use std::borrow::BorrowMut;
+
 use anyhow::Result;
 use batman::Batman;
-use dbus::blocking::Connection;
+use dbus::blocking::SyncConnection;
+use once_cell::sync::Lazy;
 
 use crate::config::Config;
+
+static SYSTEM: Lazy<SyncConnection> = Lazy::new(|| SyncConnection::new_system().unwrap());
+static SESSION: Lazy<SyncConnection> = Lazy::new(|| SyncConnection::new_session().unwrap());
+
+static mut BATMAN: Lazy<Batman> = Lazy::new(|| {
+    let mut config = Config::get().unwrap();
+    config.validate();
+    Batman::new(config, &SYSTEM, &SESSION).unwrap()
+});
 
 fn main() -> Result<()> {
     pretty_env_logger::init();
     info!("logging enabled");
 
-    let mut config = Config::get()?;
-    config.validate();
-
-    let system = Connection::new_system()?;
-    let session = Connection::new_session()?;
-
-    let batman = Batman::new(config, &system, &session)?;
-    batman.add_signals()?;
-
-    // Only those who have suffered long, can see the light within the shadows
-    batman.watch(&system)
+    unsafe {
+        BATMAN.borrow_mut().watch_connect()?;
+        BATMAN.borrow_mut().watch_disconnect()?;
+        BATMAN.borrow_mut().watch_change()?;
+        // Only those who have suffered long, can see the light within the shadows
+        BATMAN.watch(&SYSTEM)
+    }
 }
