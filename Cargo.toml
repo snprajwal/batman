@@ -1,0 +1,21 @@
+[package]
+name = "batman"
+description = "A minimal battery manager for Linux"
+version = "0.1.0"
+authors = ["Prajwal S N <prajwalnadig21@gmail.com"]
+edition = "2024"
+
+[[bin]]
+name = "batman"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+log = "0.4"
+pretty_env_logger = "0.5"
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
+panic = "abort"
